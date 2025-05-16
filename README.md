@@ -1,20 +1,3 @@
-# Email & Transcript Exporter 📨📄
-
-A Python tool to **search Outlook emails**, **download meeting transcripts from Google Drive**, and **export everything into organized, searchable PDF reports** — including **OCR (text recognition)** for easy searchability.
-
----
-
-## 🔧 Features
-
-- 📥 Searches **Outlook emails** using your provided keywords
-- 📎 Exports **emails and attachments** as PDFs
-- 📄 Downloads **Google Docs transcripts** from a Drive folder
-- 📚 Merges all content into categorized PDF bundles
-- 🔍 Runs **OCR** (optional) so you can search inside the PDFs
-- 💬 Prompts you for inputs — no hardcoded paths or credentials
-
----
-
 ## 📂 What You'll Need
 
 - **Outlook Desktop App** (for email extraction via COM)
@@ -23,3 +6,32 @@ A Python tool to **search Outlook emails**, **download meeting transcripts from 
 - Dependencies:
   ```bash
   pip install -r requirements.txt
+
+If you're using Outlook on Windows, you'll also need:
+pip install pywin32==306
+
+📦 Installation
+Clone this repository
+
+bash
+Copy
+Edit
+git clone https://github.com/<your-repo-link>.git
+cd <repo-folder>
+Install dependencies
+
+bash
+Copy
+Edit
+pip install -r requirements.txt
+pip install pywin32==306  # Required for Outlook automation on Windows
+vbnet
+Copy
+Edit
+
+This version clearly separates `pywin32==306` as a Windows-specific requirement so users know exactly when to install it.
+
+Let me know if you want me to help scaffold:
+- A `config_template.json`
+- The refactored `email_transcript_exporter.py` with user prompts
+- Sample output folder structure or dummy PDFs for demo purposes
