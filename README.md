@@ -12,7 +12,7 @@ pip install pywin32==306
 
 📦 Installation
 1. Clone this repository
-git clone https://github.com/<your-repo-link>.git
+git clone [https://github.com/<your-repo-link>.git](https://github.com/Picklesasdf/outlook-transcript-exporter.git)
 cd <repo-folder>
 
 2. Install dependencies
