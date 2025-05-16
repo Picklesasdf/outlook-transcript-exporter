@@ -11,23 +11,13 @@ If you're using Outlook on Windows, you'll also need:
 pip install pywin32==306
 
 📦 Installation
-Clone this repository
-
-bash
-Copy
-Edit
+1. Clone this repository
 git clone https://github.com/<your-repo-link>.git
 cd <repo-folder>
-Install dependencies
 
-bash
-Copy
-Edit
+2. Install dependencies
 pip install -r requirements.txt
 pip install pywin32==306  # Required for Outlook automation on Windows
-vbnet
-Copy
-Edit
 
 This version clearly separates `pywin32==306` as a Windows-specific requirement so users know exactly when to install it.
 
