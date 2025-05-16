@@ -23,10 +23,10 @@ pip install pywin32==306  # Required for Outlook automation on Windows
 python email_transcript_exporter.py
 
 3. When prompted:
-Enter your search keywords
-Choose where to save results
-Point to your Google Drive transcript folder
-(First time only) Authenticate your Google account
+- Enter your search keywords
+- Choose where to save results
+- Point to your Google Drive transcript folder
+- (First time only) Authenticate your Google account
 
 5.Done! Your PDFs will be saved and merged into output folders.
 
