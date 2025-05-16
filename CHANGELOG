@@ -1,0 +1,18 @@
+# Changelog
+
+## v1.0.132 (2025-05-16)
+### Changes Made
+- Added support for transcript files in .txt and .docx format
+- Converted .txt/.docx to PDF
+- Removed Google Drive API sync
+- Red callouts for Google Docs and file size splitting
+
+### Reason
+Improve flexibility; remove API dependency
+
+### Status
+✅ Verified locally; ready for public use
+
+### References
+- https://python-docx.readthedocs.io/
+- https://pyfpdf.readthedocs.io/
