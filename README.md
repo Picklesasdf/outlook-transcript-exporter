@@ -12,10 +12,10 @@ pip install pywin32==306
 
 📦 Installation
 1. Clone this repository
-git clone [https://github.com/<your-repo-link>.git](https://github.com/Picklesasdf/outlook-transcript-exporter.git)
-cd <repo-folder>
+git clone https://github.com/<your-repo-link>.git
+cd outlook-transcript-exporter
 
-2. Install dependencies
+3. Install dependencies
 pip install -r requirements.txt
 pip install pywin32==306  # Required for Outlook automation on Windows
 
