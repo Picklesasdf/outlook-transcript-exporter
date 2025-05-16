@@ -30,9 +30,15 @@ python email_transcript_exporter.py
 
 5.Done! Your PDFs will be saved and merged into output folders.
 
-This version clearly separates `pywin32==306` as a Windows-specific requirement so users know exactly when to install it.
+📌 Security Notes
+✅ Everything runs locally — your emails, files, and transcripts never leave your machine
+🔐 You must authorize Google access yourself via the official OAuth window
+📁 You choose the folders where content is saved
+📄 License
+This project is licensed under the MIT License.
+You're free to use, modify, and share — just don’t hold me liable if something breaks.
 
-Let me know if you want me to help scaffold:
-- A `config_template.json`
-- The refactored `email_transcript_exporter.py` with user prompts
-- Sample output folder structure or dummy PDFs for demo purposes
+🙋 Need Help?
+If you're unsure about the code, paste it into ChatGPT and ask:
+“Can you explain what this script does and if it looks safe?”
+That's what I would do too.
