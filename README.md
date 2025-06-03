@@ -1,9 +1,3 @@
-diff --git a/README.md b/README.md
-index c662cf30d9f09e3cc9c649c144ef25acc04835a4..45593382c15365e4a9f6d002816f788cbb8262d6 100644
---- a/README.md
-+++ b/README.md
-@@ -2,43 +2,43 @@
- 
  - **Outlook Desktop App** (for email extraction via COM)
  - **Python 3.8+**
  - **Google Drive API credentials** (`client_secret.json`)
