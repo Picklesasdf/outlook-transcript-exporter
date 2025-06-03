@@ -30,9 +30,11 @@ OCR_CHECK_PERCENTAGE = 0.05 # Check 5% of pages for existing text
 OCR_CHECK_MAX_PAGES = 25 # Max number of pages to check for existing text
 OCR_MIN_TEXT_LENGTH_THRESHOLD = 10 # Min text length on a page to consider it OCR'd
 
-GDRIVE_CLIENT_SECRET_FILE = "client_secret.json" # Path to your Google client_secret.json
-GDRIVE_TOKEN_FILE = 'token.json' # Path where the token will be stored
-GDRIVE_MEETING_TRANSCRIPTS_FOLDER_ID = "1y84cNQAnSsr7UYvK84TXH4MmW-GZmuC8" # Specific Google Drive Folder ID
+# Default Google Drive configuration. These are overwritten by user input at
+# runtime so that the script works for anyone without editing the code.
+GDRIVE_CLIENT_SECRET_FILE = "client_secret.json"  # Default path to client_secret.json
+GDRIVE_TOKEN_FILE = "token.json"  # Default path where the OAuth token will be stored
+GDRIVE_MEETING_TRANSCRIPTS_FOLDER_ID = ""  # Google Drive folder ID containing transcripts
 
 SIGNATURE_IMAGE_EXTENSIONS = ('.png', '.gif', '.jpg', '.jpeg', '.bmp', '.tif', '.tiff')
 WORD_EXTENSIONS = ('.doc', '.docx')
@@ -89,6 +91,7 @@ def initialize_paths_and_logging():
     global keywords_input, keywords, BASE_FOLDER, EMAIL_SAVE_PATH, ATTACHMENT_SAVE_PATH
     global TRANSCRIPT_SAVE_PATH, LOG_FILE, CONSOLIDATED_EMAIL_PDF_PATH
     global CONSOLIDATED_ATTACHMENT_PDF_PATH, CONSOLIDATED_TRANSCRIPT_PDF_PATH
+    global GDRIVE_CLIENT_SECRET_FILE, GDRIVE_TOKEN_FILE, GDRIVE_MEETING_TRANSCRIPTS_FOLDER_ID
 
     keywords_input = input("Enter keywords to search for (separated by commas): ")
     keywords = [kw.strip().lower() for kw in keywords_input.split(',') if kw.strip()]
@@ -102,6 +105,19 @@ def initialize_paths_and_logging():
     if not safe_keyword_string: # Fallback if all keywords become empty after sanitizing
         safe_keyword_string = "search"
         print("Keywords resulted in an empty string after sanitization. Using 'search' for folder name.")
+
+    # Prompt for Google Drive configuration so the script can work for any user
+    user_input = input(f"Path to Google client_secret.json [{GDRIVE_CLIENT_SECRET_FILE}]: ").strip()
+    if user_input:
+        GDRIVE_CLIENT_SECRET_FILE = user_input
+
+    user_input = input(f"Path for Google Drive token file [{GDRIVE_TOKEN_FILE}]: ").strip()
+    if user_input:
+        GDRIVE_TOKEN_FILE = user_input
+
+    user_input = input("Google Drive folder ID for meeting transcripts (leave blank to skip download): ").strip()
+    if user_input:
+        GDRIVE_MEETING_TRANSCRIPTS_FOLDER_ID = user_input
 
 
     HOME_DOWNLOADS_PATH = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -650,6 +666,10 @@ def download_google_docs_from_drive(search_keywords, local_transcript_folder,
                                     drive_folder_id=GDRIVE_MEETING_TRANSCRIPTS_FOLDER_ID):
     """Downloads Google Docs matching keywords from a specified Drive folder as PDFs."""
     global USE_TQDM_FOR_LOGGING
+    if not drive_folder_id:
+        log("ℹ️ No Google Drive folder ID provided. Skipping transcript download.")
+        return []
+
     log(f"Attempting to download Google Docs from Drive folder ID: {drive_folder_id}")
     try:
         from googleapiclient.discovery import build

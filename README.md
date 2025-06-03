@@ -24,8 +24,8 @@ python email_transcript_exporter.py
 
 3. When prompted:
 - Enter your search keywords
-- Choose where to save results
-- Point to your Google Drive transcript folder
+- Specify paths for your `client_secret.json` and token file (or accept the defaults)
+- Provide the Google Drive folder ID that contains your transcripts
 - (First time only) Authenticate your Google account
 
 5.Done! Your PDFs will be saved and merged into output folders.
