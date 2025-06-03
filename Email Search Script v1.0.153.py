@@ -1,8 +1,3 @@
-diff --git a/Email Search Script v1.0.153.py	 b/Email Search Script v1.0.153.py	
-index 6ba95b4203163e68c9323cabaa744f570251796b..4e9667d8172a4a70153bf80a7eef75df779cb039 100644
---- a/Email Search Script v1.0.153.py	
-+++ b/Email Search Script v1.0.153.py	
-@@ -8,53 +8,55 @@ from pypdf import PdfReader, PdfWriter
  from io import BytesIO
  from tqdm import tqdm
  import subprocess
