@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.8"
 typer = "^0.12"
+pypdf = "^4.2"
 PyMuPDF = "^1.23"
 ocrmypdf = { version = "^14.0", optional = true }
 easyocr = { version = "^1.7", optional = true }

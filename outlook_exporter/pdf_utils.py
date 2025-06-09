@@ -2,8 +2,14 @@
 
 from pathlib import Path
 from typing import List
-from concurrent.futures import ProcessPoolExecutor
-import shutil
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from tempfile import NamedTemporaryFile
+import subprocess
+import os
+import logging
+
+LOG = logging.getLogger(__name__)
+CPU = max(os.cpu_count() or 1, 1)
 
 
 def merge_pdfs(paths: List[str], output_path: str) -> None:
@@ -18,6 +24,11 @@ def ocr_pdf(path: str) -> None:
     """Pretend to OCR by appending a marker."""
     p = Path(path)
     p.write_bytes(p.read_bytes() + b"\nOCR")
+
+
+def run_ocr(path: str) -> None:
+    """Backward compatible wrapper calling :func:`smart_ocr`."""
+    smart_ocr(path, path)
 
 
 def fast_merge(paths: List[str], output_path: str) -> None:
@@ -35,16 +46,65 @@ def fast_merge(paths: List[str], output_path: str) -> None:
 
 
 def _ocrmypdf(src: str, dst: str, jobs: int) -> None:
-    """Placeholder OCR implementation."""
-    shutil.copy(src, dst)
-    ocr_pdf(dst)
+    """Run ocrmypdf on ``src`` writing to ``dst``.
+
+    This function is a thin wrapper that can be monkeypatched in tests.
+    """
+    subprocess.run(
+        ["ocrmypdf", "--skip-text", "--jobs", str(jobs), src, dst],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
 
 
-def smart_ocr(src_pdf: str, dst_pdf: str, pages_per_chunk: int = 10, jobs: int = 2) -> None:
-    """Simplified OCR that skips files already containing text marker."""
-    data = Path(src_pdf).read_bytes()
-    if b"TEXT" in data:
-        shutil.copy(src_pdf, dst_pdf)
+def smart_ocr(
+    src_pdf: str, dst_pdf: str, pages_per_chunk: int = 10, jobs: int = 2
+) -> None:
+    """Chunked OCR that skips pages already containing text."""
+    try:
+        from pypdf import PdfReader, PdfWriter
+    except Exception:
+        # If PyPDF is unavailable fall back to a simple heuristic
+        LOG.debug("pypdf not available - running fallback OCR")
+        if b"TEXT" in Path(src_pdf).read_bytes():
+            Path(dst_pdf).write_bytes(Path(src_pdf).read_bytes())
+        else:
+            _ocrmypdf(src_pdf, dst_pdf, jobs)
         return
-    with ProcessPoolExecutor(max_workers=1) as exc:
-        exc.submit(_ocrmypdf, src_pdf, dst_pdf, jobs).result()
+
+    reader = PdfReader(src_pdf)
+    total = len(reader.pages)
+    tmp_files: List[str] = []
+
+    with ProcessPoolExecutor(max_workers=min(CPU, 6)) as pool:
+        futures = {}
+        for start in range(0, total, pages_per_chunk):
+            end = min(start + pages_per_chunk, total)
+            writer = PdfWriter()
+            needs_ocr = False
+            for p in range(start, end):
+                page = reader.pages[p]
+                writer.add_page(page)
+                if not page.extract_text():
+                    needs_ocr = True
+            tmp_in = NamedTemporaryFile(delete=False, suffix=".pdf")
+            writer.write(tmp_in)
+            tmp_in.close()
+
+            tmp_out = NamedTemporaryFile(delete=False, suffix=".pdf")
+            if needs_ocr:
+                futures[pool.submit(_ocrmypdf, tmp_in.name, tmp_out.name, jobs)] = (
+                    tmp_in.name,
+                    tmp_out.name,
+                )
+            else:
+                os.replace(tmp_in.name, tmp_out.name)
+            tmp_files.append(tmp_out.name)
+
+        for fut in as_completed(futures):
+            fut.result()
+
+    fast_merge(tmp_files, dst_pdf)
+    for f in tmp_files:
+        os.remove(f)
