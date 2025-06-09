@@ -7,3 +7,9 @@ All notable changes to this project will be documented in this file.
 - Poetry packaging and CLI entry point
 - Basic unit tests and CI workflow skeleton
 - Modular package layout under `outlook_exporter`
+
+## [0.3.0] - 2025-05-17
+### Added
+- Fast PDF merge using PyMuPDF with fallback
+- Smart OCR helper skipping text pages
+- CLI flags to tune OCR and merging

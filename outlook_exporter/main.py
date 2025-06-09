@@ -18,9 +18,10 @@ def export(keywords: str, output_dir: str, config: Config) -> None:
             pdf_path.write_text(mail)
             pdf_paths.append(str(pdf_path))
         merged = Path(output_dir) / "merged.pdf"
-        pdf_utils.merge_pdfs(pdf_paths, str(merged))
+        merge_fn = pdf_utils.fast_merge if config.merge_backend == "pymupdf" else pdf_utils.merge_pdfs
+        merge_fn(pdf_paths, str(merged))
         if config.use_ocr:
-            pdf_utils.ocr_pdf(str(merged))
+            pdf_utils.smart_ocr(str(merged), str(merged), config.pages_per_chunk, config.workers)
         if config.drive_folder:
             gdrive.download_transcripts(config.drive_folder, config.credential_path)
         logger.info("Export finished")
