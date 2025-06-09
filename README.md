@@ -9,6 +9,12 @@ poetry install
 poetry run outlook-exporter "invoice" --output-dir results
 ```
 
+Install with the `gpu` extra to enable GPU OCR:
+
+```bash
+poetry install -E gpu
+```
+
 See `--help` for all options.
 
 ## Performance flags
@@ -30,6 +36,6 @@ poetry run outlook-exporter "IR OAC" --use-ocr
 # tuned
 poetry run outlook-exporter "IR" --use-ocr --pages-per-chunk 5 --workers 12
 
-# GPU OCR
+# GPU OCR (after `poetry install -E gpu`)
 poetry run outlook-exporter "IR" --use-ocr --ocr-backend gpu
 ```
