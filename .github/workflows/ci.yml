@@ -13,18 +13,32 @@ jobs:
       MERGE_BACKEND: ${{ matrix.merge_backend }}
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install deps
+
+      - name: Install Poetry
         run: |
-          python -m pip install --upgrade pip
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Set Poetry to use Python 3.9
+        run: |
+          python3.9 --version
+          poetry env use python3.9
+
+      - name: Install OS dependencies
+        run: |
           sudo apt-get update
           sudo apt-get install -y ocrmypdf
-          pip install poetry
-          poetry env use 3.9
-          poetry install --with dev
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
       - name: Lint
         run: poetry run ruff outlook_exporter tests
+
       - name: Test
-        run: poetry run python -m pytest -q
+        run: poetry run pytest -q
