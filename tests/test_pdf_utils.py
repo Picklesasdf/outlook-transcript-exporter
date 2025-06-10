@@ -5,10 +5,12 @@ import types
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from outlook_exporter import pdf_utils
+
 try:
     from pypdf import PdfWriter, PdfReader
 except ModuleNotFoundError:  # offline fallback
-    import types, sys as _sys
+    import types
+    import sys as _sys
 
     stub = types.ModuleType("pypdf")
 
@@ -33,6 +35,7 @@ except ModuleNotFoundError:  # offline fallback
     stub.PdfWriter = PdfWriter
     _sys.modules["pypdf"] = stub
     from pypdf import PdfWriter
+
     pdf_utils.PdfReader = PdfReader
 
 
@@ -89,6 +92,7 @@ def test_smart_ocr_runs(tmp_path, monkeypatch):
 
         def submit(self, fn, *args, **kwargs):
             from concurrent.futures import Future
+
             fut = Future()
             fut.set_result(fn(*args, **kwargs))
             return fut
@@ -136,6 +140,7 @@ def test_smart_ocr_skip(tmp_path, monkeypatch):
 
         def submit(self, fn, *args, **kwargs):
             from concurrent.futures import Future
+
             fut = Future()
             fut.set_result(fn(*args, **kwargs))
             return fut
