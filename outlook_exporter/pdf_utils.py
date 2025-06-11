@@ -84,9 +84,21 @@ def smart_ocr(
             writer = PdfWriter()
             needs_ocr = False
             for p in range(start, end):
-                page = reader.pages[p]
+                orig_page = reader.pages[p]
+                has_text = False
+                if hasattr(orig_page, "extract_text"):
+                    try:
+                        has_text = bool(orig_page.extract_text())
+                    except Exception:
+                        has_text = False
+                if "__getitem__" not in dir(orig_page):
+                    tmp_w = PdfWriter()
+                    tmp_w.add_blank_page(width=72, height=72)
+                    page = tmp_w.pages[0]
+                else:
+                    page = orig_page
                 writer.add_page(page)
-                if not page.extract_text():
+                if not has_text:
                     needs_ocr = True
             tmp_in = NamedTemporaryFile(delete=False, suffix=".pdf")
             writer.write(tmp_in)
