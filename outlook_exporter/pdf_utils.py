@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 import subprocess
 import os
 import logging
+import shutil
 
 LOG = logging.getLogger(__name__)
 CPU = max(os.cpu_count() or 1, 1)
@@ -74,7 +75,25 @@ def smart_ocr(
         return
 
     reader = PdfReader(src_pdf)
-    total = len(reader.pages)
+    pages = list(reader.pages)
+
+    all_text = True
+    for p in pages:
+        has_text = False
+        if hasattr(p, "extract_text"):
+            try:
+                has_text = bool(p.extract_text())
+            except Exception:
+                has_text = False
+        if not has_text:
+            all_text = False
+            break
+
+    if all_text:
+        shutil.copyfile(src_pdf, dst_pdf)
+        return
+
+    total = len(pages)
     tmp_files: List[str] = []
 
     with ProcessPoolExecutor(max_workers=min(CPU, 6)) as pool:
