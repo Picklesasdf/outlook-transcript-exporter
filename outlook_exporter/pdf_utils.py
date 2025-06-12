@@ -1,7 +1,6 @@
 """PDF utilities for merging and OCR."""
 
 from pathlib import Path
-from typing import List, Optional
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tempfile import NamedTemporaryFile
 import subprocess
@@ -140,7 +139,6 @@ def smart_ocr(
     for f in tmp_files:
         os.remove(f)
 
-
 def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
     """OCR ``src`` into ``dst`` with a timeout."""
     try:
@@ -228,3 +226,4 @@ def ocr_and_merge_attachments(
             LOG.error("Failed: %s -> %s", item["file"], item["error"])
 
     return summary
+main
