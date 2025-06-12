@@ -228,3 +228,8 @@ def ocr_and_merge_attachments(
             LOG.error("Failed: %s -> %s", item["file"], item["error"])
 
     return summary
+
+
+def main() -> None:
+    """Entry point for manual invocation."""
+    pass
