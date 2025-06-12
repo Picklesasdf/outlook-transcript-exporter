@@ -1,7 +1,6 @@
 """PDF utilities for merging and OCR."""
 
 from pathlib import Path
-from typing import List
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tempfile import NamedTemporaryFile
 import subprocess
