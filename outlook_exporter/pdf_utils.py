@@ -148,7 +148,8 @@ def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
             ["ocrmypdf", "--skip-text", "--jobs", str(jobs), src, dst],
             check=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIP
+    else:
+        return None
 
 
 if __name__ == "__main__":  # pragma: no cover - manual invocation
