@@ -1,7 +1,7 @@
 """PDF utilities for merging and OCR."""
 
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tempfile import NamedTemporaryFile
 import subprocess
@@ -139,3 +139,18 @@ def smart_ocr(
     fast_merge(tmp_files, dst_pdf)
     for f in tmp_files:
         os.remove(f)
+
+
+def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
+    """OCR ``src`` into ``dst`` with a timeout."""
+    try:
+        subprocess.run(
+            ["ocrmypdf", "--skip-text", "--jobs", str(jobs), src, dst],
+            check=True,
+            stdout=subprocess.PIPE,
+    else:
+        return None
+
+
+if __name__ == "__main__":  # pragma: no cover - manual invocation
+    main()
