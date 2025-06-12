@@ -149,3 +149,7 @@ def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIP
+
+
+if __name__ == "__main__":  # pragma: no cover - manual invocation
+    main()
