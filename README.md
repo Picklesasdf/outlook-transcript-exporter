@@ -22,6 +22,27 @@ pip install outlook-exporter[gpu]
 
 See `--help` for all options.
 
+## Configuration
+
+Create an ``outlook_exporter.ini`` file in the current directory to store default settings:
+
+```ini
+[DEFAULT]
+keywords = invoice project
+output_dir = results
+use_ocr = true
+ocr_backend = ocrmypdf
+pages_per_chunk = 10
+workers = 4
+merge_backend = pymupdf
+drive_folder = abc123
+credential_path = creds.json
+check_interval = 10
+max_mb = 25
+```
+
+Any CLI flag will override the file value.
+
 ## Performance flags
 
 | Flag | Description | Default |
@@ -35,12 +56,15 @@ See `--help` for all options.
 Example usage:
 
 ```bash
-# default
-poetry run outlook-exporter "IR OAC" --use-ocr
+# interactive
+poetry run outlook-exporter run
+
+# default with keywords
+poetry run outlook-exporter run "IR OAC" --use-ocr
 
 # tuned
-poetry run outlook-exporter "IR" --use-ocr --pages-per-chunk 5 --workers 12
+poetry run outlook-exporter run "IR" --use-ocr --pages-per-chunk 5 --workers 12
 
 # GPU OCR (pip install outlook-exporter[gpu])
-poetry run outlook-exporter "IR" --use-ocr --ocr-backend gpu
+poetry run outlook-exporter run "IR" --use-ocr --ocr-backend gpu
 ```

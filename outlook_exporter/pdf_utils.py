@@ -1,8 +1,8 @@
 """PDF utilities for merging and OCR."""
 
 from pathlib import Path
-from typing import List, Optional
-from concurrent.futures import ProcessPoolExecutor, as_completed
+from typing import List, Optional, Tuple
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from tempfile import NamedTemporaryFile
 import subprocess
 import os
@@ -11,6 +11,37 @@ import shutil
 
 LOG = logging.getLogger(__name__)
 CPU = max(os.cpu_count() or 1, 1)
+
+
+def write_email_pdf(msg, output_path: Path) -> None:
+    """Render an email object into a PDF file."""
+    try:
+        from reportlab.pdfgen import canvas
+    except Exception:  # pragma: no cover - optional dependency
+        Path(output_path).write_text(
+            f"From: {msg.sender}\nTo: {', '.join(msg.recipients)}\nSubject: {msg.subject}\n\n{msg.body}"
+        )
+        return
+
+    c = canvas.Canvas(str(output_path))
+    y = 800
+    c.drawString(50, y, f"From:   {msg.sender}")
+    y -= 20
+    c.drawString(50, y, f"To:     {', '.join(msg.recipients)}")
+    y -= 20
+    if getattr(msg, "cc", None):
+        c.drawString(50, y, f"CC:     {', '.join(msg.cc)}")
+        y -= 20
+    c.drawString(50, y, f"Date:   {msg.date.strftime('%Y-%m-%d %H:%M')}")
+    y -= 20
+    c.drawString(50, y, f"Subject:{msg.subject}")
+    y -= 30
+    text = c.beginText(50, y)
+    for line in msg.body.splitlines():
+        text.textLine(line)
+    c.drawText(text)
+    c.showPage()
+    c.save()
 
 
 def merge_pdfs(paths: List[str], output_path: str) -> None:
@@ -155,6 +186,29 @@ def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
         return exc
     else:
         return None
+
+
+def ocr_attachment(src: Path) -> Tuple[Optional[Path], bool, str]:
+    """OCR a single attachment with a timeout."""
+
+    dst = src.with_name(src.stem + "_ocr.pdf")
+
+    def task() -> Optional[Exception]:
+        try:
+            _ocrmypdf(str(src), str(dst), 1)
+            return None
+        except Exception as e:  # pragma: no cover - runtime guard
+            return e
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(task)
+        try:
+            err = future.result(timeout=60)
+            if err is None:
+                return dst, True, ""
+            return None, False, str(err)
+        except Exception as exc:  # pragma: no cover - runtime guard
+            return None, False, str(exc)
 
 
 def ocr_and_merge_attachments(
