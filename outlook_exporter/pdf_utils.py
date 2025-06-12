@@ -1,7 +1,6 @@
 """PDF utilities for merging and OCR."""
 
 from pathlib import Path
-from typing import List, Optional
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tempfile import NamedTemporaryFile
 import subprocess
@@ -139,97 +138,3 @@ def smart_ocr(
     fast_merge(tmp_files, dst_pdf)
     for f in tmp_files:
         os.remove(f)
-
-
-def _ocr_file(src: str, dst: str, jobs: int) -> Optional[Exception]:
-    """OCR ``src`` into ``dst`` with a timeout."""
-    try:
-        subprocess.run(
-            ["ocrmypdf", "--skip-text", "--jobs", str(jobs), src, dst],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=60,
-        )
-        return None
-    except Exception as exc:  # pragma: no cover - runtime guard
-        return exc
-
-
-def ocr_and_merge_attachments(
-    attachments: List[str], out_pdf: str, email_count: int, jobs: int = 2
-) -> dict:
-    """OCR attachments in parallel then merge them into ``out_pdf``.
-
-    Returns a summary dictionary of results.
-    """
-
-    summary = {
-        "emails": email_count,
-        "attachments": len(attachments),
-        "ocred": 0,
-        "merged": 0,
-        "failed": 0,
-        "errors": [],
-    }
-
-    tmp_outputs: List[str] = []
-
-    with ProcessPoolExecutor(max_workers=min(CPU, len(attachments) or 1)) as pool:
-        futures = {}
-        for path in attachments:
-            LOG.info("Downloaded %s", path)
-            tmp_out = NamedTemporaryFile(delete=False, suffix=".pdf")
-            futures[pool.submit(_ocr_file, path, tmp_out.name, jobs)] = (
-                path,
-                tmp_out.name,
-            )
-            tmp_outputs.append(tmp_out.name)
-
-        for fut in as_completed(futures):
-            src, tmp = futures[fut]
-            err = fut.result()
-            if err is None:
-                LOG.info("OCR succeeded: %s", src)
-                summary["ocred"] += 1
-            else:
-                LOG.error("OCR failed for %s: %s", src, err)
-                summary["failed"] += 1
-                summary["errors"].append({"file": src, "error": str(err)})
-                try:
-                    os.remove(tmp)
-                except OSError:
-                    pass
-                tmp_outputs.remove(tmp)
-
-    if tmp_outputs:
-        fast_merge(tmp_outputs, out_pdf)
-        summary["merged"] = len(tmp_outputs)
-        LOG.info("Merged %d files into %s", len(tmp_outputs), out_pdf)
-    else:
-        LOG.warning("No files were OCRed successfully; nothing to merge")
-
-    for f in tmp_outputs:
-        try:
-            os.remove(f)
-        except OSError:
-            pass
-
-    LOG.info(
-        "Summary: emails=%d attachments=%d ocred=%d merged=%d failed=%d",
-        summary["emails"],
-        summary["attachments"],
-        summary["ocred"],
-        summary["merged"],
-        summary["failed"],
-    )
-    if summary["errors"]:
-        for item in summary["errors"]:
-            LOG.error("Failed: %s -> %s", item["file"], item["error"])
-
-    return summary
-
-
-def main() -> None:
-    """Entry point for manual invocation."""
-    pass
