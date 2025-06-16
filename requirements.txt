@@ -1,0 +1,8 @@
+pywin32>=306
+pypdf>=4.0.0
+tqdm>=4.64.0
+PyMuPDF>=1.22.0
+reportlab>=3.6.12
+google-api-python-client>=2.112.0
+google-auth>=2.29.0
+google-auth-oauthlib>=1.2.0
